@@ -4,6 +4,10 @@ from torchvision.datasets import ImageFolder
 from torchvision import transforms
 import numpy as np
 from torch.utils.data import Subset
+from src.logger import get_logger
+from src.exception import AppException
+
+logger = get_logger("data")
 
 
 def is_image_file(filename):
@@ -44,7 +48,8 @@ def get_transforms(input_size=224):
 
 def create_dataloaders(data_path, train_transforms, val_transforms, batch_size=64, num_workers=2):
     if not os.path.exists(data_path):
-        raise FileNotFoundError(f"Dataset path not found: {data_path}")
+        logger.error(f"Dataset path not found: {data_path}")
+        raise AppException(f"Dataset path not found: {data_path}")
 
     full_dataset = SafeImageFolder(data_path, transform=train_transforms)
     filenames = np.array([os.path.basename(path[0]) for path in full_dataset.samples])
@@ -63,5 +68,5 @@ def create_dataloaders(data_path, train_transforms, val_transforms, batch_size=6
                               num_workers=num_workers, pin_memory=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,
                             num_workers=num_workers, pin_memory=True)
-
+    logger.info(f"Created dataloaders. Classes: {full_dataset.classes}")
     return train_loader, val_loader, full_dataset.classes

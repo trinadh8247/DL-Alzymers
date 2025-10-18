@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+.env
+.venv
+venv/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Logs
+*.log
+
+# Model artifacts
+*.pth
+*.pt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

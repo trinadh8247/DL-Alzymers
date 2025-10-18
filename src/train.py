@@ -4,6 +4,10 @@ import torch.optim as optim
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.preprocessing import label_binarize
+from src.logger import get_logger
+from src.exception import AppException
+
+logger = get_logger("train")
 
 
 def train(model, train_loader, val_loader, device, epochs=8, lr=5e-4, checkpoint_path="vgg16_best_valacc.pth"):
@@ -85,9 +89,14 @@ def train(model, train_loader, val_loader, device, epochs=8, lr=5e-4, checkpoint
 
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            torch.save(model.state_dict(), checkpoint_path)
+            try:
+                torch.save(model.state_dict(), checkpoint_path)
+                logger.info(f"Saved best checkpoint to {checkpoint_path}")
+            except Exception as e:
+                logger.exception("Failed to save checkpoint")
+                raise AppException("Could not save checkpoint", e)
 
-        print(f"Epoch {epoch+1}/{epochs} - Train Acc: {train_acc:.2f} | Val Acc: {val_acc:.2f} | F1: {f1:.4f} | ROC-AUC: {roc_auc:.4f}")
+        logger.info(f"Epoch {epoch+1}/{epochs} - Train Acc: {train_acc:.2f} | Val Acc: {val_acc:.2f} | F1: {f1:.4f} | ROC-AUC: {roc_auc:.4f}")
 
     print("Training complete. Best Val Acc:", best_val_acc)
     return history

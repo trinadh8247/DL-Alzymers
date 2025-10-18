@@ -1,5 +1,9 @@
 import torch.nn as nn
 from torchvision import models
+from src.logger import get_logger
+from src.exception import AppException
+
+logger = get_logger("model")
 
 
 def get_vgg16_model(num_classes, pretrained=True, freeze_features=True):
