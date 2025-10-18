@@ -6,3 +6,5 @@ Pillow
 scikit-learn
 tqdm
 matplotlib
+gunicorn
+requests
