@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict | Alzheimer's MRI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <nav class="top-nav">
+            <div class="brand">Alzheimer's MRI</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/model">Model</a>
+                <a class="highlight" href="/predict">Predict</a>
+            </div>
+        </nav>
+
+        <section class="hero hero-split compact">
+            <div class="hero-copy">
+                <div class="eyebrow">Interactive demo</div>
+                <h1>Upload an MRI slice</h1>
+                <p class="subtitle">Get a predicted stage, top-3 classes, and full class probabilities with one click.</p>
+                <div class="hero-actions">
+                    <a class="btn primary" href="#analyze">Start predicting</a>
+                    <a class="btn ghost" href="/model">See training recipe</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image predict" aria-hidden="true"></div>
+                <p class="caption">Upload a single axial slice (PNG/JPG).</p>
+            </div>
+        </section>
+
+        <section class="upload-card" id="analyze">
+            <div class="section-header">
+                <h2>Try the model</h2>
+                <p class="section-subtitle">Upload an MRI slice to view predicted stage, top-3 classes, and full probabilities.</p>
+            </div>
+
+            <div class="upload-section">
+                <form id="uploadForm">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="imageInput" accept="image/*" required>
+                        <label for="imageInput" class="file-label">Choose MRI Image</label>
+                        <span id="fileName" class="file-name">No file chosen</span>
+                    </div>
+                    <button type="submit" class="btn-submit">Analyze Image</button>
+                </form>
+                
+                <div id="preview" class="preview-section" style="display: none;">
+                    <h3>Selected Image</h3>
+                    <img id="previewImage" src="" alt="Preview">
+                </div>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing...</p>
+            </div>
+            
+            <div id="results" class="results-section" style="display: none;">
+                <h2>Prediction Results</h2>
+                
+                <div class="main-prediction">
+                    <h3>Predicted Class</h3>
+                    <div id="predictedClass" class="predicted-class"></div>
+                    <div id="confidence" class="confidence"></div>
+                </div>
+                
+                <div class="top3-section">
+                    <h3>Top 3 Predictions</h3>
+                    <div id="top3List" class="top3-list"></div>
+                </div>
+                
+                <div class="all-probs">
+                    <h3>All Probabilities</h3>
+                    <div id="allProbs" class="prob-bars"></div>
+                </div>
+            </div>
+            
+            <div id="error" class="error-section" style="display: none;">
+                <h3>Error</h3>
+                <p id="errorMessage"></p>
+            </div>
+        </section>
+
+        <section class="cta-band">
+            <div>
+                <h3>Need the training recipe?</h3>
+                <p>Read how the model was built and download the notebook or weights.</p>
+            </div>
+            <div class="hero-actions">
+                <a class="btn ghost" href="/model">View model details</a>
+                <a class="btn link" href="/download-notebook">Download notebook</a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const fileName = document.getElementById('fileName');
+        const uploadForm = document.getElementById('uploadForm');
+        const preview = document.getElementById('preview');
+        const previewImage = document.getElementById('previewImage');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorDiv = document.getElementById('error');
+        
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                fileName.textContent = this.files[0].name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(this.files[0]);
+                results.style.display = 'none';
+                errorDiv.style.display = 'none';
+            }
+        });
+        
+        uploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const file = imageInput.files[0];
+            if (!file) return;
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            errorDiv.style.display = 'none';
+            const formData = new FormData();
+            formData.append('image', file);
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                loading.style.display = 'none';
+                if (response.ok) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'Prediction failed');
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                showError('Network error: ' + error.message);
+            }
+        });
+        
+        function displayResults(data) {
+            document.getElementById('predictedClass').textContent = data.predicted_class;
+            document.getElementById('confidence').textContent = `Confidence: ${(data.confidence * 100).toFixed(2)}%`;
+            const top3List = document.getElementById('top3List');
+            top3List.innerHTML = data.top3.map((item, idx) => `
+                <div class="top3-item">
+                    <span class="rank">${idx + 1}.</span>
+                    <span class="class-name">${item.class}</span>
+                    <span class="prob">${(item.probability * 100).toFixed(2)}%</span>
+                </div>
+            `).join('');
+            const allProbs = document.getElementById('allProbs');
+            const sortedProbs = Object.entries(data.probabilities).sort((a, b) => b[1] - a[1]);
+            allProbs.innerHTML = sortedProbs.map(([className, prob]) => `
+                <div class="prob-item">
+                    <span class="prob-label">${className}</span>
+                    <div class="prob-bar-container">
+                        <div class="prob-bar" style="width: ${prob * 100}%"></div>
+                    </div>
+                    <span class="prob-value">${(prob * 100).toFixed(2)}%</span>
+                </div>
+            `).join('');
+            results.style.display = 'block';
+        }
+        
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

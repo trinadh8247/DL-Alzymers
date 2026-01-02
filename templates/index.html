@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alzheimer's MRI Classification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <nav class="top-nav">
+            <div class="brand">Alzheimer's MRI</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/model">Model</a>
+                <a class="highlight" href="/predict">Try Prediction</a>
+            </div>
+        </nav>
+
+        <header class="hero hero-split">
+            <div class="hero-copy">
+                <div class="eyebrow">Dataset overview</div>
+                <h1>Alzheimer's MRI Classification</h1>
+                <p class="subtitle">
+                    Built on the Kaggle Alzheimer's multiclass MRI dataset (equal and augmented) to detect four clinical stages with a fine-tuned VGG16 model.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn primary" href="/predict">Try the predictor</a>
+                    <a class="btn ghost" href="/model">Project details</a>
+                    <a class="btn link" href="https://www.kaggle.com/datasets/aryansinghal10/alzheimers-multiclass-dataset-equal-and-augmented" target="_blank" rel="noopener">Dataset on Kaggle</a>
+                </div>
+
+                <div class="hero-grid">
+                    <div class="stat-card">
+                        <h4>Classes covered</h4>
+                        <ul class="inline-list">
+                            <li>Non Demented</li>
+                            <li>Very Mild</li>
+                            <li>Mild</li>
+                            <li>Moderate</li>
+                        </ul>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Balanced set</h4>
+                        <p class="stat-body">Augmented to reduce class imbalance; all slices resized to 224×224 and normalized to ImageNet stats.</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Intended use</h4>
+                        <p class="stat-body">Educational demo only. Not a diagnostic tool—clinical decisions require specialist review.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image" aria-hidden="true"></div>
+                <p class="caption">Sample T1-weighted MRI slice (illustrative).</p>
+            </div>
+        </header>
+
+        <section class="dataset-section" id="dataset">
+            <div class="section-header">
+                <h2>Dataset details</h2>
+                <span class="pill">Source: Kaggle</span>
+            </div>
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Provenance</h3>
+                    <p>Alzheimer's MRI multiclass dataset (equalized and augmented) by Aryan Singhal, hosted on Kaggle. Images are pre-processed T1-weighted axial MRI slices organized by clinical stage.</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Label schema</h3>
+                    <p>Four classes representing progressive cognitive impairment: Non Demented, Very Mild Demented, Mild Demented, and Moderate Demented. The notebook documents any relabeling or class balancing applied before training.</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Preprocessing</h3>
+                    <p>Uniform resize to 224×224, RGB conversion, and ImageNet mean/std normalization to match VGG16 expectations. Augmentations (flips/rotations) equalize class counts; see the notebook for exact transforms.</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Model training summary</h3>
+                    <p>VGG16 backbone with ImageNet weights, later conv blocks fine-tuned, custom classifier head with batch norm and dropout. Training uses cross-entropy on the balanced set.</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Responsible use</h3>
+                    <p>For research and educational purposes. MRI-based screening should be paired with clinical assessment, additional biomarkers, and oversight from medical professionals.</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Project assets</h3>
+                    <p>Download the full training notebook or jump to the model page for the training recipe, evaluation notes, and model weights.</p>
+                    <div class="inline-actions">
+                        <a class="btn ghost small" href="/download-notebook">Notebook</a>
+                        <a class="btn ghost small" href="/model">Model page</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="project-summary">
+            <div class="section-header">
+                <h2>Project summary</h2>
+                <span class="pill">End-to-end pipeline</span>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>Goal</h3>
+                    <p>Provide a transparent, reproducible demo of MRI-based Alzheimer's stage classification, from dataset to deployable Flask app.</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Stack</h3>
+                    <p>PyTorch + torchvision VGG16, PIL/NumPy preprocessing, Flask backend, vanilla JS frontend.</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Outputs</h3>
+                    <p>Stage prediction with confidence, top-3 breakdown, and full class probability bars. Downloadable model and notebook for further study.</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Next steps</h3>
+                    <p>Extend with external validation, calibration, and clinician-in-the-loop review; optionally swap backbone to lighter MobileNet for faster inference.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-band">
+            <div>
+                <h2>Ready to explore the model?</h2>
+                <p>See the training recipe and download the assets, or jump straight to interactive predictions.</p>
+            </div>
+            <div class="hero-actions">
+                <a class="btn primary" href="/predict">Try prediction</a>
+                <a class="btn ghost" href="/model">View model details</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

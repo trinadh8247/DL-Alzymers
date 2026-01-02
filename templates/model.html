@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Details | Alzheimer's MRI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <nav class="top-nav">
+            <div class="brand">Alzheimer's MRI</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a class="highlight" href="/model">Model</a>
+                <a href="/predict">Predict</a>
+            </div>
+        </nav>
+
+        <header class="hero hero-split">
+            <div class="hero-copy">
+                <div class="eyebrow">Training recipe</div>
+                <h1>Model + Training Details</h1>
+                <p class="subtitle">How the VGG16 model was fine-tuned on the Kaggle Alzheimer's MRI multiclass dataset.</p>
+                <div class="hero-actions">
+                    <a class="btn primary" href="/download-model">Download model weights</a>
+                    <a class="btn ghost" href="/download-notebook">Download training notebook</a>
+                    <a class="btn link" href="/predict">Try the model</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image model" aria-hidden="true"></div>
+                <p class="caption">Architecture sketch: VGG16 backbone + custom classifier.</p>
+            </div>
+        </header>
+
+        <section class="dataset-section">
+            <div class="section-header">
+                <h2>Data pipeline</h2>
+                <span class="pill">From raw to ready</span>
+            </div>
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Source</h3>
+                    <p>Kaggle Alzheimer's MRI multiclass dataset (equal and augmented) with four balanced classes.</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Transforms</h3>
+                    <p>Resize to 224×224, RGB conversion, normalization with ImageNet mean/std. Augmentations (random flips/rotations) applied to equalize classes.</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Splits</h3>
+                    <p>Training/validation split performed after balancing to maintain equal representation per class.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="dataset-section">
+            <div class="section-header">
+                <h2>Model architecture</h2>
+                <span class="pill">Transfer learning</span>
+            </div>
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Backbone</h3>
+                    <p>VGG16 with ImageNet weights. Early convolutional blocks frozen; later blocks fine-tuned.</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Classifier head</h3>
+                    <p>Linear(25088→1024) → ReLU → BatchNorm → Dropout(0.5) → Linear(1024→512) → ReLU → BatchNorm → Dropout(0.3) → Linear(512→4).</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Optimization</h3>
+                    <p>Cross-entropy loss on balanced classes; training on GPU when available. BatchNorm and Dropout to stabilize and regularize.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="dataset-section">
+            <div class="section-header">
+                <h2>Training workflow</h2>
+                <span class="pill">Reproducible</span>
+            </div>
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Steps</h3>
+                    <p>1) Load balanced dataset 2) Apply preprocessing/augmentation 3) Freeze early VGG16 blocks 4) Fine-tune later blocks + custom head 5) Validate each epoch, track best val accuracy 6) Save best checkpoint (vgg16_best_valacc.pth).</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Outputs</h3>
+                    <p>Saved weights (vgg16_best_valacc.pth), class names JSON, and the training notebook to reproduce or adapt.</p>
+                </div>
+                <div class="detail-card">
+                    <h3>Usage</h3>
+                    <p>Load the weights in the Flask app for inference; same preprocessing as training ensures consistency.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-band">
+            <div>
+                <h2>Download and experiment</h2>
+                <p>Grab the assets or jump into the live predictor.</p>
+            </div>
+            <div class="hero-actions">
+                <a class="btn primary" href="/download-model">Download weights</a>
+                <a class="btn ghost" href="/download-notebook">Download notebook</a>
+                <a class="btn link" href="/predict">Open prediction page</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
